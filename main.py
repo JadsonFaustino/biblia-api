@@ -1,14 +1,18 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 import json
 import os
 import uvicorn
 from loguru import logger
 import traceback
+import unicodedata
 
 app = FastAPI()
 
-BIBLE_PATH = './biblia/ave-maria-refactor.json'
+bible_router = APIRouter(prefix='/biblia')
+
+BIBLES_PATH = './biblia'
+DEFAULT_BIBLE_EDITION = 'ave-maria'
 
 def handle_error(e):
     logger.error(f"{e} (line {traceback.extract_stack()[-2].lineno})")
@@ -17,8 +21,13 @@ def handle_error(e):
         detail=str(e.detail if hasattr(e, 'detail') else str(e))
     )
 
+def remove_accents(input_str):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', input_str)
+        if unicodedata.category(c) != 'Mn'
+    )
 
-@app.get('/health')
+@bible_router.get('/health')
 def health_check():
     """
     Health check endpoint to verify if the service is running.
@@ -31,14 +40,15 @@ def health_check():
     )
 
 
-@app.get('/livros')
+@bible_router.get('/livros')
 def list_books(
 ):
     """
     Endpoint to list all books in the Bible.
     """
     try:
-        with open(BIBLE_PATH, 'r') as file:
+        bible_path = f"{BIBLES_PATH}/{DEFAULT_BIBLE_EDITION}.json"
+        with open(bible_path, 'r') as file:
             bible_json = json.load(file)
         return JSONResponse(
             content={
@@ -59,8 +69,9 @@ def list_books(
         handle_error(e)
 
 
-@app.get('/livro/{book}')
-def get_book(book: str | int):
+@bible_router.get("/livro/{book}")
+@bible_router.get("/{edition}/livro/{book}")
+def get_book(book: str | int, edition = DEFAULT_BIBLE_EDITION):
     """
     Endpoint to get details of a specific book in the Bible and its verses.
     """
@@ -68,7 +79,8 @@ def get_book(book: str | int):
         index_mode = book.isdigit()
         abbr_mode = not index_mode and len(book) <= 3
         response = None
-        with open(BIBLE_PATH, 'r') as file:
+        bible_path = f"{BIBLES_PATH}/{edition}.json"
+        with open(bible_path, 'r') as file:
             bible_json = json.load(file)
 
         if (abbr_mode):
@@ -80,7 +92,7 @@ def get_book(book: str | int):
             response = [b for b in bible_json.values()][int(book) - 1]
 
         if (not abbr_mode and not index_mode):
-            partial_response = [i for i in filter(lambda b: b['nome'].lower() == book.lower(), bible_json.values())]
+            partial_response = [i for i in filter(lambda b: remove_accents(b['nome'].lower()) == remove_accents(book.lower()), bible_json.values())]
             if len(partial_response) > 0:
                 response = partial_response[0]
 
@@ -99,8 +111,9 @@ def get_book(book: str | int):
         handle_error(e)
 
 
-@app.get('/livro/{book}/capitulo/{chapter}')
-def get_chapter(book: str | int, chapter: str | int):
+@bible_router.get('/livro/{book}/capitulo/{chapter}')
+@bible_router.get('/{edition}/livro/{book}/capitulo/{chapter}')
+def get_chapter(book: str | int, chapter: str | int, edition = DEFAULT_BIBLE_EDITION):
     """
     Endpoint to get a specific chapter of a book in the Bible and its details.
     """
@@ -114,7 +127,8 @@ def get_chapter(book: str | int, chapter: str | int):
         index_mode = book.isdigit()
         abbr_mode = not index_mode and len(book) <= 3
         book_response = None
-        with open(BIBLE_PATH, 'r') as file:
+        bible_path = f"{BIBLES_PATH}/{edition}.json"
+        with open(bible_path, 'r') as file:
             bible_json = json.load(file)
 
         if (abbr_mode):
@@ -126,7 +140,7 @@ def get_chapter(book: str | int, chapter: str | int):
             book_response = [b for b in bible_json.values()][int(book) - 1]
 
         if (not abbr_mode and not index_mode):
-            partial_book_response = [i for i in filter(lambda b: b['nome'].lower() == book.lower(), bible_json.values())]
+            partial_book_response = [i for i in filter(lambda b: remove_accents(b['nome'].lower()) == remove_accents(book.lower()), bible_json.values())]
             if len(partial_book_response) > 0:
                 book_response = partial_book_response[0]
 
@@ -151,8 +165,9 @@ def get_chapter(book: str | int, chapter: str | int):
         handle_error(e)
 
 
-@app.get('/livro/{book}/capitulo/{chapter}/versiculo/{verse}')
-def get_verse(book: str | int, chapter: str | int, verse: str | int):
+@bible_router.get('/livro/{book}/capitulo/{chapter}/versiculo/{verse}')
+@bible_router.get('/{edition}/livro/{book}/capitulo/{chapter}/versiculo/{verse}')
+def get_verse(book: str | int, chapter: str | int, verse: str | int, edition = DEFAULT_BIBLE_EDITION):
     """
     Endpoint to get a specific verse of a book in the Bible and its details.
     """
@@ -172,7 +187,8 @@ def get_verse(book: str | int, chapter: str | int, verse: str | int):
         index_mode = book.isdigit()
         abbr_mode = not index_mode and len(book) <= 3
         book_response = None
-        with open(BIBLE_PATH, 'r') as file:
+        bible_path = f"{BIBLES_PATH}/{edition}.json"
+        with open(bible_path, 'r') as file:
             bible_json = json.load(file)
 
         if (abbr_mode):
@@ -184,7 +200,7 @@ def get_verse(book: str | int, chapter: str | int, verse: str | int):
             book_response = [b for b in bible_json.values()][int(book) - 1]
 
         if (not abbr_mode and not index_mode):
-            partial_book_response = [i for i in filter(lambda b: b['nome'].lower() == book.lower(), bible_json.values())]
+            partial_book_response = [i for i in filter(lambda b: remove_accents(b['nome'].lower()) == remove_accents(book.lower()), bible_json.values())]
             if len(partial_book_response) > 0:
                 book_response = partial_book_response[0]
 
@@ -216,11 +232,12 @@ def get_verse(book: str | int, chapter: str | int, verse: str | int):
     except Exception as e:
         handle_error(e)
 
+app.include_router(bible_router)
 
 # run app
 if __name__ == '__main__':
-    if not os.path.exists(BIBLE_PATH):
-        print(f"Bible file not found at {BIBLE_PATH}. Please check the path.")
+    if not os.path.exists(BIBLES_PATH):
+        print(f"Bible file not found at {BIBLES_PATH}. Please check the path.")
     else:
         uvicorn.run(app, host="localhost", port=8000)
         print("Starting FastAPI server...")
