@@ -1,6 +1,6 @@
-# 📖 API da Bíblia (Ave Maria)
+# 📖 API da Bíblia
 
-API desenvolvida em **Python com FastAPI** para acesso à Bíblia Ave Maria em formato JSON. Permite listar livros, capítulos e versículos via HTTP.
+API desenvolvida em **Python com FastAPI** para acesso à Bíblia em formato JSON. Permite listar livros, capítulos e versículos via HTTP.
 
 ## 🚀 Como executar
 
@@ -15,7 +15,7 @@ Acesse: [http://localhost:8000](http://localhost:8000)
 
 ## ✅ Health Check
 
-**GET** `/health`
+**GET** `/biblia/health`
 
 ```json
 {
@@ -27,7 +27,7 @@ Acesse: [http://localhost:8000](http://localhost:8000)
 
 ## 📚 Listar todos os livros
 
-**GET** `/livros`
+**GET** `/biblia/livros`
 
 Retorna todos os livros com nome, abreviação, quantidade de capítulos e testamento.
 
@@ -35,28 +35,36 @@ Retorna todos os livros com nome, abreviação, quantidade de capítulos e testa
 
 ## 📖 Buscar um livro específico
 
-**GET** `/livro/{nome, abreviação ou índice do livro}`
+**GET** `/biblia/livro/{nome, abreviação ou índice do livro}`
+**GET** `/biblia/{edicao}/livro/{nome, abreviação ou índice do livro}`
 
 Pode ser:
-- Nome completo (`/livro/Gênesis`)
-- Abreviação (`/livro/Gn`)
-- Índice (`/livro/1`)
+- Nome completo (`/biblia/livro/Gênesis`)
+- Abreviação (`/biblia/livro/Gn`)
+- Índice (`/biblia/livro/1`)
+- Com edição (`/biblia/pastoral/livro/gn`)
 
 ---
 
 ## 📄 Buscar um capítulo
 
-**GET** `/livro/{nome, abreviação ou índice do livro}/capitulo/{número do capítulo}`
+**GET** `/biblia/livro/{nome, abreviação ou índice do livro}/capitulo/{número do capítulo}`
+**GET** `{edicao}/livro/{nome, abreviação ou índice do livro}/capitulo/{número do capítulo}`
 
-Exemplo: `/livro/Gn/capitulo/1`
+Exemplos: 
+- `/biblia/livro/Gn/capitulo/1`
+- `/biblia/ave-maria/livro/apocalipse/capitulo/5`
 
 ---
 
 ## ✝ Buscar um versículo
 
-**GET** `/livro/{nome, abreviação ou índice do livro}/capitulo/{número do capítulo}/versiculo/{número do versículo}`
+**GET** `/biblia/livro/{nome, abreviação ou índice do livro}/capitulo/{número do capítulo}/versiculo/{número do versículo}`
+**GET** `/biblia/{edicao}/livro/{nome, abreviação ou índice do livro}/capitulo/{número do capítulo}/versiculo/{número do versículo}`
 
-Exemplos: `/livro/Gn/capitulo/1/versiculo/1`
+Exemplos: 
+- `/biblia/livro/Gn/capitulo/1/versiculo/1`
+- `/biblia/pastoral/livro/deuteronomio/capitulo/10/versiculo/20`
 
 ---
 
@@ -91,5 +99,8 @@ Exemplos: `/livro/Gn/capitulo/1/versiculo/1`
 
 O JSON da Bíblia Ave Maria foi obtido e adaptado a partir do repositório:  
 👉 [https://github.com/fidalgobr/bibliaAveMariaJSON](https://github.com/fidalgobr/bibliaAveMariaJSON)
+
+O JSON da Bília Pastoral foi gerado a partir de Web Scrapping e consultas a API da Paulus:  
+👉 [https://biblia.paulus.com.br/biblia-pastoral](https://biblia.paulus.com.br/biblia-pastoral)
 
 ---
