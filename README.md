@@ -100,7 +100,10 @@ Exemplos:
 O JSON da Bíblia Ave Maria foi obtido e adaptado a partir do repositório:  
 👉 [https://github.com/fidalgobr/bibliaAveMariaJSON](https://github.com/fidalgobr/bibliaAveMariaJSON)
 
-O JSON da Bília Pastoral foi gerado a partir de Web Scrapping e consultas a API da Paulus:  
+O JSON da Bília Pastoral foi gerado a partir de Web Scrapping e consultas a API utilizada no site da Paulus:  
 👉 [https://biblia.paulus.com.br/biblia-pastoral](https://biblia.paulus.com.br/biblia-pastoral)
+
+O JSON da Bíblia de Aparecida foi gerado a partir de Web Scrapping e consultas a API utilizada no site da Bíblia de Aparecida:  
+👉 [https://www.a12.com/biblia/](https://www.a12.com/biblia/)
 
 ---
